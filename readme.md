@@ -62,6 +62,17 @@ The example code in this text omits some lines from the complete export script i
 You could make a proper export dialog, but making it a panel allows for one-click export and is very nice for rapid iterating, so that's what this guide will show you how to do.
 
 ## Making the Panel
+Metadata about the script and where its UI is located is defined by a magic `bl_info` dictionary
+```python
+bl_info = {
+    "name": "Game Asset Exporter",
+    "author": "Your Name",
+    "version": (2022, 7, 18),
+    "blender": (3, 2, 1),
+    "location": "Properties > Object > Export",
+    "description": "One-click export game asset files.",
+    "category": "Export"}
+```
 A Property Group stores configuration for the exporter. A button to do an action is connected to an Operator class. A Panel classes's draw method defines the order in which configuration UI and operator buttons are displayed.
 
 This exporter's properties are the mesh file path, skeleton and animations file path, and drop-down boxes to redefine Forward and Up axes.
