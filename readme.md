@@ -27,13 +27,13 @@ file: Mesh {
 
 SkeletonJoint {
 	u32 parent index
-    f32 model_space_inverse_bind_pose_matrix[16]
+	f32 model_space_inverse_bind_pose_matrix[16]
 }
 
 AnimationJoint {
 	float position[3]
-    Quaternion rotationQuaternion[4]
-    float scale[3]
+	Quaternion rotationQuaternion[4]
+	float scale[3]
 }
 
 AnimationFrame {
@@ -42,9 +42,9 @@ AnimationFrame {
 
 Animation {
 	uint32 frameCount
-    uint32 nameLength
-    char name[nameLength]
-    Frame frames[frameCount]
+	uint32 nameLength
+	char name[nameLength]
+	Frame frames[frameCount]
 }
 
 file: Skeleton {
@@ -66,58 +66,58 @@ This exporter's properties are the mesh file path, skeleton and animations file 
 ```python
 axesEnum = [("X","X","",1),("-X","-X","",2),("Y","Y","",3),("-Y","-Y","",4),("Z","Z","",5),("-Z","-Z","",6)]
 class ExportProperties(bpy.types.PropertyGroup):
-    meshPath: bpy.props.StringProperty(name="Mesh Path", subtype='FILE_PATH')
-    skeletonPath: bpy.props.StringProperty(name="Skeleton+animations Path", subtype='FILE_PATH')
-    forwardAxis: bpy.props.EnumProperty(name="Forward", items=axesEnum, default="-Y")
-    upAxis: bpy.props.EnumProperty(name="Up", items=axesEnum, default="Z")
+	meshPath: bpy.props.StringProperty(name="Mesh Path", subtype='FILE_PATH')
+	skeletonPath: bpy.props.StringProperty(name="Skeleton+animations Path", subtype='FILE_PATH')
+	forwardAxis: bpy.props.EnumProperty(name="Forward", items=axesEnum, default="-Y")
+	upAxis: bpy.props.EnumProperty(name="Up", items=axesEnum, default="Z")
 	
 class ExportMeshOperator(bpy.types.Operator):
-    bl_idname = "object.export_mesh"
-    bl_label = "Export Mesh"
-    def execute(self, context):
-        # Do stuff...
-        return {'FINISHED'}
+	bl_idname = "object.export_mesh"
+	bl_label = "Export Mesh"
+	def execute(self, context):
+		# Do stuff...
+		return {'FINISHED'}
 
 class ExportSkeletonOperator(bpy.types.Operator):
-    bl_idname = "object.export_skeleton"
-    bl_label = "Export Skeleton and Animations"
-    def execute(self, context):
-        # Do stuff...
-        return {'FINISHED'}
+	bl_idname = "object.export_skeleton"
+	bl_label = "Export Skeleton and Animations"
+	def execute(self, context):
+		# Do stuff...
+		return {'FINISHED'}
 
 class ExportPanel(bpy.types.Panel):
-    bl_label = "Export"
-    bl_idname = "OBJECT_PT_layout"
-    bl_space_type = 'PROPERTIES'
-    bl_region_type = 'WINDOW'
-    bl_context = "object"
-    def draw(self, context):
-        self.layout.prop(context.scene.exportProperties, "meshPath")
-        self.layout.prop(context.scene.exportProperties, "skeletonPath")
-        self.layout.prop(context.scene.exportProperties, "forwardAxis")
-        self.layout.prop(context.scene.exportProperties, "upAxis")
-        self.layout.operator('object.export_mesh')
-        self.layout.operator('object.export_skeleton')
+	bl_label = "Export"
+	bl_idname = "OBJECT_PT_layout"
+	bl_space_type = 'PROPERTIES'
+	bl_region_type = 'WINDOW'
+	bl_context = "object"
+	def draw(self, context):
+		self.layout.prop(context.scene.exportProperties, "meshPath")
+		self.layout.prop(context.scene.exportProperties, "skeletonPath")
+		self.layout.prop(context.scene.exportProperties, "forwardAxis")
+		self.layout.prop(context.scene.exportProperties, "upAxis")
+		self.layout.operator('object.export_mesh')
+		self.layout.operator('object.export_skeleton')
 ```
 
 Finally, you need to register these classes with Blender, and tell it how to clean up if the user disables this export plugin.
 ```python
 def register():
-    bpy.utils.register_class(ExportProperties)
-    bpy.utils.register_class(ExportMeshOperator)
-    bpy.utils.register_class(ExportSkeletonOperator)
-    bpy.utils.register_class(ExportPanel)
-    bpy.types.Scene.exportProperties = bpy.props.PointerProperty(type=ExportProperties)
+	bpy.utils.register_class(ExportProperties)
+	bpy.utils.register_class(ExportMeshOperator)
+	bpy.utils.register_class(ExportSkeletonOperator)
+	bpy.utils.register_class(ExportPanel)
+	bpy.types.Scene.exportProperties = bpy.props.PointerProperty(type=ExportProperties)
 
 def unregister():
-    bpy.utils.unregister_class(ExportProperties)
-    bpy.utils.unregister_class(ExportMeshOperator)
-    bpy.utils.unregister_class(ExportSkeletonOperator)
-    bpy.utils.unregister_class(ExportPanel)
-    del bpy.types.Scene.exportProperties
+	bpy.utils.unregister_class(ExportProperties)
+	bpy.utils.unregister_class(ExportMeshOperator)
+	bpy.utils.unregister_class(ExportSkeletonOperator)
+	bpy.utils.unregister_class(ExportPanel)
+	del bpy.types.Scene.exportProperties
 
 if __name__ == "__main__":
-    register()
+	register()
 ```
 
 # Working with Objects
@@ -207,7 +207,7 @@ if armature:
 After getting all the mesh data, change the armature back to the previous pose. You could just set it to "POSE", but it may have been in "REST" position already.
 ```python
 if armature:
-    setArmaturePosition(armature, originalArmaturePosition)
+	setArmaturePosition(armature, originalArmaturePosition)
 ```
 
 # Armature Data
@@ -232,7 +232,7 @@ for animation in bpy.data.actions:
 	startFrame = int(animation.frame_range.x)
 	endFrame = int(animation.frame_range.y)
 	for frame in range(startFrame, endFrame+1):
-        bpy.context.scene.frame_set(frame)
+		bpy.context.scene.frame_set(frame)
 ```
 Save the current frame when the script is ran and restore it when finished.
 
