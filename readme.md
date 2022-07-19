@@ -3,7 +3,9 @@ Everyone would like to have "the .png of 3D file formats," but such a thing does
 
 Say you use an OBJ loading library for your project, and later you decide you want to support skeleton animations. OBJ doesn't support skeletons, so now you have to find a new library to load a new format and redo your integration code from scratch.
 
-If you're in control of all models you will need to load (most games, for example), making your own format and exporter that does only what you need cuts down on completixy and work. You can have Blender output a simple, predictable binary format that's easy for the engine to parse. If you need more data later, you can extend your existing exporter. Blender makes it easy enough to get the data you're interested in, though where to find it in Blender's Python API can be hard to figure out. That's what this guide is for.
+If you're in control of all models you will need to load (most games, for example), making your own format and exporter that does only what you need cuts down on completixy and work. You can have Blender output a simple, predictable binary format that's easy for the engine to parse. If you need more data later, you can extend your existing exporter.
+
+Blender makes it easy enough to get the data you're interested in, though where to find it in Blender's Python API can be hard to figure out. I was able to write my own exporter thanks to [IQM](https://github.com/lsalzman/iqm) having the most readable blender export scripts I've seen by far. I recommend referencing those in addition to this guide. 
 
 This repo includes a complete export script that produces files for meshes and skeleton animations. The file format has no name, and looks like this:
 ```
@@ -18,9 +20,9 @@ Vertex {
 file: Mesh {
 	u32 faceCount
 	u32 vertexCount
-	bool hasUVs
-	bool hasNormals
-	bool hasJointBindings
+	bool8 hasUVs
+	bool8 hasNormals
+	bool8 hasJointBindings
 	u16 faces[3 * faceCount]
 	Vertex vertices[vertexCount]
 }
@@ -31,9 +33,9 @@ SkeletonJoint {
 }
 
 AnimationJoint {
-	float position[3]
-	Quaternion rotationQuaternion[4]
-	float scale[3]
+	f32 position[3]
+	f32 rotationQuaternion[4]
+	f32 scale[3]
 }
 
 AnimationFrame {
@@ -43,14 +45,14 @@ AnimationFrame {
 Animation {
 	uint32 frameCount
 	uint32 nameLength
-	char name[nameLength]
+	char8 name[nameLength]
 	Frame frames[frameCount]
 }
 
 file: Skeleton {
 	u32 skeletonJointCount
 	SkeletonJoint joints[skeletonJointCount]
-	uint32 animation_count
+	u32 animation_count
 	Animation animations[animationCount]
 }
 ```
@@ -122,7 +124,7 @@ if __name__ == "__main__":
 
 # Working with Objects
 
-##Getting Selected Objects
+## Getting Selected Objects
 Artists may have a lot of objects on the side they created while making the final mesh, or multiple game objects in the file. Many exporters have an option for only exporting the selected meshes.
 ```python
 meshList = []
@@ -130,7 +132,7 @@ for object in bpy.context.selected_objects:
 	if object.type == "MESH":
 		meshList.append(object)
 ```
-You can access an object's mesh with `object.to_mesh()`, but objects contain data we'll need that the mesh doesn't, so we'll leave it as-is for now.
+You can access an [object's](https://docs.blender.org/api/current/bpy.types.Object.html) mesh with `object.to_mesh()`, but objects contain data we'll need that the mesh doesn't, so we'll leave it as-is for now.
 
 To get armatures, check if `object.type == "ARMATURE"` instead.
 
@@ -149,7 +151,7 @@ Apply the transformation to the mesh with matrix multiplication, which is `@` in
 `mesh.transform(transformMatrix @ object.matrix_world)`
 
 # BMeshes
-BMesh allows you to do operations on a mesh in Python scripts. You can convert a regular mesh to a BMesh, modify it, then convert back.
+[BMesh](https://docs.blender.org/api/current/bmesh.html) allows you to do operations on a mesh in Python scripts. You can convert a regular mesh to a BMesh, modify it, then convert back.
 ```python
 bm = bmesh.new()
 bm.from_mesh(mesh)
@@ -162,7 +164,7 @@ Graphics cards don't deal with quads or n-gons, only triangles. Convert all face
 `bmesh.ops.triangulate(bm, faces=bm.faces)`
 
 # Extracting Mesh Data
-The faces of a mesh are stored in the `polygon` property. Polygons are made up of vertices, a.k.a polygon corners, a.k.a. loops. Each polygon has a list of loop indices which can be used to look up vertex data. While a polygon has a list of vertex indices, these are not very useful by themselves. Loop indices allow you to associate vertex position, uv, normal, and bone bindings.
+The faces of a [mesh](https://docs.blender.org/api/current/bpy.types.Mesh.html) are stored in the `polygon` property. [Polygons](https://docs.blender.org/api/current/bpy.types.MeshPolygon.html) are made up of vertices, a.k.a polygon corners, a.k.a. [loops](https://docs.blender.org/api/current/bpy.types.MeshLoops.html). Each polygon has a list of loop indices which can be used to look up vertex data. While a polygon has a list of vertex indices, these are not very useful by themselves. Loop indices allow you to associate vertex position, uv, normal, and bone bindings.
 ```python
 for polygon in mesh.polygons:
 	if len(polygon.loop_indices) == 3:
@@ -211,11 +213,11 @@ if armature:
 ```
 
 # Armature Data
-An armature is a skeleton containing bones. More specifically, an armature is a set of joints that are linked together. Each joint is a transform, and the joints form a tree. Animations apply additional transforms to joints over time.
+An armature is a skeleton containing [bones](https://docs.blender.org/api/current/bpy.types.Bone.html). More specifically, an armature is a set of joints that are linked together. Each joint is a transform, and the joints form a tree. Animations apply additional transforms to joints over time.
 
 My setup is to have one armature per file, and animations are made up of Blender's Actions (in the dopesheet panel, change to Action Editor). We can extract animation data by just playing the animation and getting each bone's final transform at different times.
 
-## Extracting Bones Rest Positions
+## Extracting Bone Rest Positions
 Games tend to be interested in the inverse model-space pose, since you only need the rest positions of bones when building the skinning matrix. `bone.matrix_local` is unaffected by animations.
 ```python
 for bone in armature.data.bones:
