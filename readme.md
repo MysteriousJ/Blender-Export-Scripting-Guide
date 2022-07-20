@@ -149,17 +149,25 @@ To get armatures, check if `object.type == "ARMATURE"` instead.
 
 ## Applying Modifiers
 Get the evaluated dependency graph
-`sceneWithAppliedModifiers = bpy.context.evaluated_depsgraph_get()`
+```python
+sceneWithAppliedModifiers = bpy.context.evaluated_depsgraph_get()
+```
 Use it to make a copy of the object's mesh with modifiers applied
-`mesh = object.evaluated_get(sceneWithAppliedModifiers).to_mesh(preserve_all_data_layers=True, depsgraph=bpy.context.evaluated_depsgraph_get())`
+```python
+mesh = object.evaluated_get(sceneWithAppliedModifiers).to_mesh(preserve_all_data_layers=True, depsgraph=bpy.context.evaluated_depsgraph_get())
+```
 
 ## Reorienting Meshes
 Blender's Forward, Right, and Up axes may not match the game engine's. Exporters allow you to remap these axes by selecting positive or negative X, Y, or Z axes for Forward and Up, then deriving Right from them.
 Use Blender's built-in [axis_conversion](https://docs.blender.org/api/current/bpy_extras.io_utils.html#bpy_extras.io_utils.axis_conversion) function to get the final matrix
-`return axis_conversion("-Y", "Z", bpy.context.scene.exportProperties.forwardAxis, bpy.context.scene.exportProperties.upAxis).to_4x4()`
+```python
+return axis_conversion("-Y", "Z", bpy.context.scene.exportProperties.forwardAxis, bpy.context.scene.exportProperties.upAxis).to_4x4()
+```
 
 Apply the transformation to the mesh with matrix multiplication, which is `@` in Python
-`mesh.transform(transformMatrix @ object.matrix_world)`
+```python
+mesh.transform(transformMatrix @ object.matrix_world)
+```
 
 # BMeshes
 [BMesh](https://docs.blender.org/api/current/bmesh.html) allows you to do operations on a mesh in Python scripts. You can convert a regular mesh to a BMesh, modify it, then convert back.
@@ -172,7 +180,9 @@ bm.to_mesh(mesh)
 
 ## Triangulating Meshes
 Graphics cards don't deal with quads or n-gons, only triangles. Convert all faces with more than 3 sides to triangles with a BMesh
-`bmesh.ops.triangulate(bm, faces=bm.faces)`
+```python
+bmesh.ops.triangulate(bm, faces=bm.faces)
+```
 
 # Extracting Mesh Data
 The faces of a [mesh](https://docs.blender.org/api/current/bpy.types.Mesh.html) are stored in the `polygon` property. [Polygons](https://docs.blender.org/api/current/bpy.types.MeshPolygon.html) are made up of vertices, a.k.a polygon corners, a.k.a. [loops](https://docs.blender.org/api/current/bpy.types.MeshLoops.html). Each polygon has a list of loop indices which can be used to look up vertex data. While a polygon has a list of vertex indices, these are not very useful by themselves. Loop indices allow you to associate vertex position, uv, normal, and bone bindings.
@@ -263,3 +273,14 @@ for bone in armature.pose.bones:
 	# Does not support negative scales
 	scale = parentSpacePose.to_scale()
 ```
+
+# Learning More
+The easiest way to explore data Blender makes available is to open a Python Console panel and start with
+```python
+bpy.context.selected_objects[0]
+```
+To see what it contains, write
+```python
+dir(bpy.context.selected_objects[0])
+```
+Pick one that sounds interesting and keep digging.
