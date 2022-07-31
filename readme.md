@@ -3,7 +3,7 @@ Everyone would like to have "the .png of 3D file formats," but such a thing does
 
 Say you use an OBJ loading library for your project, and later you decide you want to support skeleton animations. OBJ doesn't support skeletons, so now you have to find a new library to load a new format and redo your integration code from scratch.
 
-If you're in control of all models you will need to load (most games, for example), making your own format and exporter that does only what you need cuts down on completixy and work. You can have Blender output a simple, predictable binary format that's easy for the engine to parse. If you need more data later, you can extend your existing exporter.
+If you're in control of all models you will need to load (most games, for example), making your own format and exporter that does only what you need cuts down on complexity and work. You can have Blender output a simple, predictable binary format that's easy for the engine to parse. If you need more data later, you can extend your existing exporter.
 
 Blender makes it easy enough to get the data you're interested in, though where to find it in Blender's Python API can be hard to figure out. I was able to write my own exporter thanks to [IQM](https://github.com/lsalzman/iqm) having the most readable blender export scripts I've seen by far. I recommend referencing those in addition to this guide. 
 
@@ -73,7 +73,7 @@ bl_info = {
     "description": "One-click export game asset files.",
     "category": "Export"}
 ```
-A Property Group stores configuration for the exporter. A button to do an action is connected to an Operator class. A Panel classes's draw method defines the order in which configuration UI and operator buttons are displayed.
+A Property Group stores configuration for the exporter. A button to do an action is connected to an Operator class. A Panel class's draw method defines the order in which configuration UI and operator buttons are displayed.
 
 This exporter's properties are the mesh file path, skeleton and animations file path, and drop-down boxes to redefine Forward and Up axes.
 ```python
@@ -216,7 +216,10 @@ if vertices.get(vertex) == None:
 	vertices[vertex] = len(vertices)
 faceIndices.append(vertices[vertex])
 ```
-Convert them to an array with `vertices.keys()`
+Convert them to an array with
+```python
+vertices.keys()
+```
 Dictionaries maintain order since Python 3.7.
 
 ## Changing to Rest Position
