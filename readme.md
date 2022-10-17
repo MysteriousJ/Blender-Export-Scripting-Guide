@@ -18,11 +18,9 @@ Vertex {
 }
 
 file: Mesh {
+	bool8 hasJointBindings
 	u32 faceCount
 	u32 vertexCount
-	bool8 hasUVs
-	bool8 hasNormals
-	bool8 hasJointBindings
 	u16 faces[3 * faceCount]
 	Vertex vertices[vertexCount]
 }
